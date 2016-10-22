@@ -4,6 +4,9 @@
   "main": "server.js",
   "author": "strothj <jason@jasons.io>",
   "license": "MIT",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha"
+  },
   "devDependencies": {
     "chai": "^3.5.0",
     "chai-http": "^3.0.0",
