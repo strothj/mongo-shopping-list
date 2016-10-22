@@ -38,6 +38,31 @@ app.post('/items', (req, res) => {
   });
 });
 
+app.put('/items/:id', (req, res) => {
+  const update = { $set: { name: req.body.name } };
+  Item.findByIdAndUpdate(req.params.id, update, (err, item) => {
+    if (err) {
+      res.status(500).json({
+        message: 'Internal Server Error',
+      });
+      return;
+    }
+    res.status(200).json(item);
+  });
+});
+
+app.delete('/items/:id', (req, res) => {
+  Item.findByIdAndRemove(req.params.id, (err, item) => {
+    if (err) {
+      req.status(500).json({
+        message: 'Internal Server Error',
+      });
+      return;
+    }
+    res.status(200).json(item);
+  });
+});
+
 app.use('*', (req, res) => {
   res.status(404).json({
     message: 'Not Found',
