@@ -193,20 +193,30 @@ describe('Shopping List', () => {
       });
   });
   it('should create item on put to id that does not exist', function (done) {
+    const addNonexistantItem = () => {
+      chai.request(app)
+        .put(`/items/${expectedItems[0].id}`)
+        .send({ name: expectedItems[0].name, id: expectedItems[0].id })
+        .end(function (err, res) {
+          should.equal(err, null);
+          res.should.have.status(200);
+          getItems((newItems) => {
+            newItems.should.have.lengthOf(3);
+            newItems[2].id.should.equal(expectedItems[0].id);
+            newItems[2].name.should.equal(expectedItems[0].name);
+          });
+          done();
+        });
+    };
+
     chai.request(app)
-      .put('/items/someid')
-      .send({ name: 'Bob', id: 'someid' })
-      .end(function (err, res) {
+      .delete(`/items/${expectedItems[0].id}`)
+      .end(function (err) {
         should.equal(err, null);
-        res.should.have.status(200);
-        // storage.items.should.have.lengthOf(4);
-        // storage.items[3].should.have.property('id');
-        // storage.items[3].id.should.be.a('number');
-        // storage.items[3].should.have.property('name');
-        // storage.items[3].name.should.be.a('string');
-        // storage.items[3].id.should.equal(4);
-        // storage.items[3].name.should.equal('Bob');
-        done();
+        getItems((newItems) => {
+          newItems.should.have.lengthOf(2);
+          addNonexistantItem();
+        });
       });
   });
   it('should return error on put without body data', function (done) {

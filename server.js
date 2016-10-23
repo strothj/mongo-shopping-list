@@ -54,13 +54,14 @@ app.post('/items', (req, res) => {
 
 app.put('/items/:id', (req, res) => {
   const update = { $set: { name: req.body.name } };
+  const options = { upsert: true };
   if ((req.body.id !== req.params.id) || !req.body.name) {
     res.status(400).json({
       message: 'Malformed Message',
     });
     return;
   }
-  Item.findByIdAndUpdate(req.params.id, update, (err, item) => {
+  Item.findByIdAndUpdate(req.params.id, update, options, (err, item) => {
     if (err) {
       res.status(500).json({
         message: 'Internal Server Error',
