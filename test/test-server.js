@@ -19,7 +19,7 @@ function getItems(callback) {
 }
 
 describe('Shopping List', () => {
-  let items;
+  let expectedItems;
   before((done) => {
     server.runServer(() => {
       done();
@@ -34,7 +34,7 @@ describe('Shopping List', () => {
         { name: 'Peppers' },
       ], (err, newItems) => {
         // eslint-disable-next-line no-underscore-dangle
-        items = newItems.map(item => ({ name: item.name, id: item._id.toString() }));
+        expectedItems = newItems.map(item => ({ name: item.name, id: item._id.toString() }));
         done();
       });
     });
@@ -53,6 +53,7 @@ describe('Shopping List', () => {
         res.body[0].should.have.property('id');
         res.body[0].should.have.property('name');
         res.body[0].id.should.be.a('string');
+        res.body[0].id.should.equal(expectedItems[0].id);
         res.body[0].name.should.be.a('string');
         res.body[0].name.should.equal('Broad beans');
         res.body[1].name.should.equal('Tomatoes');
@@ -74,123 +75,127 @@ describe('Shopping List', () => {
         res.body.name.should.be.a('string');
         res.body.id.should.be.a('string');
         res.body.name.should.equal('Kale');
-        const id = res.body.id;
-        getItems((newItems) => {
-          items = newItems;
-          items.should.be.a('array');
-          items.should.have.lengthOf(4);
-          items[3].should.be.a('object');
-          items[3].should.have.property('id');
-          items[3].should.have.property('name');
-          items[3].id.should.be.a('string');
-          items[3].id.should.equal(id);
-          items[3].name.should.be.a('string');
-          items[3].name.should.equal('Kale');
+        const expectedId = res.body.id;
+        getItems((actualItems) => {
+          actualItems.should.be.a('array');
+          actualItems.should.have.lengthOf(4);
+          actualItems[3].should.be.a('object');
+          actualItems[3].should.have.property('id');
+          actualItems[3].should.have.property('name');
+          actualItems[3].id.should.be.a('string');
+          actualItems[3].id.should.equal(expectedId);
+          actualItems[3].name.should.be.a('string');
+          actualItems[3].name.should.equal('Kale');
           done();
         });
       });
   });
   it('should edit an item on put', function (done) {
-    const expectedId = items[2].id;
+    const expectedId = expectedItems[2].id;
     chai.request(app)
       .put(`/items/${expectedId}`)
       .send({ name: 'Bob', id: expectedId })
       .end(function (err, res) {
         should.equal(err, null);
         res.should.have.status(200);
-        getItems((newItems) => {
-          items = newItems;
-          items[2].id.should.equal(expectedId);
-          items[2].name.should.equal('Bob');
+        getItems((actualItems) => {
+          expectedItems = actualItems;
+          expectedItems[2].id.should.equal(expectedId);
+          expectedItems[2].name.should.equal('Bob');
           done();
         });
       });
   });
   it('should delete an item on delete', function (done) {
     chai.request(app)
-      .delete(`/items/${items[2].id}`)
+      .delete(`/items/${expectedItems[2].id}`)
       .end(function (err, res) {
         should.equal(err, null);
         res.should.have.status(200);
-        getItems((newItems) => {
-          items = newItems;
-          items.should.have.lengthOf(2);
-          items[0].name.should.equal('Broad beans');
-          items[1].name.should.equal('Tomatoes');
+        getItems((actualItems) => {
+          expectedItems = actualItems;
+          expectedItems.should.have.lengthOf(2);
+          expectedItems[0].name.should.equal('Broad beans');
+          expectedItems[1].name.should.equal('Tomatoes');
           done();
         });
       });
   });
   it('should return error on post of existing id', function (done) {
-    const existingId = items[2];
+    const existingId = expectedItems[2];
     chai.request(app)
       .post('/items')
       .send({ name: 'Another item', id: existingId })
       .end(function (err, res) {
         should.not.equal(err, null);
         res.should.have.status(400);
-        // storage.items.should.have.lengthOf(3);
-        done();
+        getItems((actualItems) => {
+          actualItems.should.have.lengthOf(3);
+          done();
+        });
       });
   });
   it('should return error on post with empty body', function (done) {
-    this.skip();
     chai.request(app)
       .post('/items')
-      .send({})
       .end(function (err, res) {
         should.not.equal(err, null);
         res.should.have.status(400);
-        // storage.items.should.have.lengthOf(3);
-        done();
+        getItems((actualItems) => {
+          actualItems.should.have.lengthOf(3);
+          done();
+        });
       });
   });
   it('should return error on post with non-json body', function (done) {
-    this.skip();
     chai.request(app)
       .post('/items')
       .field('name', 'Bob')
       .end(function (err, res) {
         should.not.equal(err, null);
         res.should.have.status(400);
-        // storage.items.should.have.lengthOf(3);
-        done();
+        getItems((actualItems) => {
+          actualItems.should.have.lengthOf(3);
+          done();
+        });
       });
   });
   it('should return error on put without id on endpoint', function (done) {
-    this.skip();
+    const expectedId = expectedItems[0].id;
     chai.request(app)
       .put('/items/')
-      .send({ name: 'Apple', id: 0 })
+      .send({ name: 'Apple', id: expectedId })
       .end(function (err, res) {
         should.not.equal(err, null);
         res.should.have.status(404);
-        // storage.items.should.have.lengthOf(3);
-        // storage.items[0].name.should.equal('Broad beans');
-        done();
+        getItems((actualItems) => {
+          actualItems.should.have.lengthOf(3);
+          actualItems[0].name.should.equal('Broad beans');
+          done();
+        });
       });
   });
   it('should return error on put with different id in endpoint than body', function (done) {
-    this.skip();
     chai.request(app)
-      .put('/items/1')
-      .send({ name: 'Bob', id: 2 })
+      .put(`/items/${expectedItems[0].id}`)
+      .send({ name: 'Bob', id: expectedItems[1].id })
       .end(function (err, res) {
         should.not.equal(err, null);
         res.should.have.status(400);
-        // storage.items.should.have.lengthOf(3);
-        // storage.items[0].name.should.equal('Broad beans');
-        // storage.items[0].id.should.equal(1);
-        // storage.items[1].name.should.equal('Tomatoes');
-        // storage.items[1].id.should.equal(2);
-        done();
+        getItems((actualItems) => {
+          actualItems.should.have.lengthOf(3);
+          actualItems[0].name.should.equal('Broad beans');
+          actualItems[0].id.should.equal(expectedItems[0].id);
+          actualItems[1].name.should.equal('Tomatoes');
+          actualItems[1].id.should.equal(expectedItems[1].id);
+          done();
+        });
       });
   });
   it('should create item on put to id that does not exist', function (done) {
-    this.skip();
     chai.request(app)
-      .put('/items/4')
-      .send({ name: 'Bob', id: 4 })
+      .put('/items/someid')
+      .send({ name: 'Bob', id: 'someid' })
       .end(function (err, res) {
         should.equal(err, null);
         res.should.have.status(200);

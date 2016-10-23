@@ -28,13 +28,7 @@ app.get('/items', (req, res) => {
   });
 });
 
-app.post('/items', (req, res) => {
-  if (req.body.id) {
-    res.status(400).json({
-      message: 'Can not provide ID',
-    });
-    return;
-  }
+function createItem(req, res) {
   Item.create({
     name: req.body.name,
   }, (err, item) => {
@@ -46,10 +40,26 @@ app.post('/items', (req, res) => {
     }
     res.status(201).json(dbItemToJsonItem(item));
   });
+}
+
+app.post('/items', (req, res) => {
+  if (!req.body.name || req.body.id) {
+    res.status(400).json({
+      message: 'Malformed Message',
+    });
+    return;
+  }
+  createItem(req, res);
 });
 
 app.put('/items/:id', (req, res) => {
   const update = { $set: { name: req.body.name } };
+  if ((req.body.id !== req.params.id) || !req.body.name) {
+    res.status(400).json({
+      message: 'Malformed Message',
+    });
+    return;
+  }
   Item.findByIdAndUpdate(req.params.id, update, (err, item) => {
     if (err) {
       res.status(500).json({
@@ -64,7 +74,7 @@ app.put('/items/:id', (req, res) => {
 app.delete('/items/:id', (req, res) => {
   Item.findByIdAndRemove(req.params.id, (err, item) => {
     if (err) {
-      req.status(500).json({
+      res.status(500).json({
         message: 'Internal Server Error',
       });
       return;
