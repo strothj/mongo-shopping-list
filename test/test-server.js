@@ -220,9 +220,8 @@ describe('Shopping List', () => {
       });
   });
   it('should return error on put without body data', function (done) {
-    this.skip();
     chai.request(app)
-      .put('/items/1')
+      .put(`/items/${expectedItems[0].id}`)
       .send({})
       .end(function (err, res) {
         should.not.equal(err, null);
@@ -231,11 +230,10 @@ describe('Shopping List', () => {
       });
   });
   it('should return error on put with non-json body', function (done) {
-    this.skip();
     chai.request(app)
-      .put('/items/1')
+      .put(`/items/${expectedItems[0].id}`)
       .field('name', 'Bob')
-      .field('id', 1)
+      .field('id', expectedItems[0].id)
       .end(function (err, res) {
         should.not.equal(err, null);
         res.should.have.status(400);
@@ -243,18 +241,27 @@ describe('Shopping List', () => {
       });
   });
   it('should return error on delete on item that does not exist', function (done) {
-    this.skip();
+    const deleteNonexistantItem = () => {
+      chai.request(app)
+        .delete(`/item/${expectedItems[0].id}`)
+        .end(function (err, res) {
+          should.not.equal(err, null);
+          res.should.have.status(404);
+          done();
+        });
+    };
+
     chai.request(app)
-      .delete('/items/4')
-      .end(function (err, res) {
-        should.not.equal(err, null);
-        res.should.have.status(404);
-        // storage.items.should.have.lengthOf(3);
-        done();
+      .delete(`/items/${expectedItems[0].id}`)
+      .end(function (err) {
+        should.equal(err, null);
+        getItems((newItems) => {
+          newItems.should.have.lengthOf(2);
+          deleteNonexistantItem();
+        });
       });
   });
   it('should return error on delete without id in endpoint', function (done) {
-    this.skip();
     chai.request(app)
       .delete('/items/')
       .end(function (err, res) {
