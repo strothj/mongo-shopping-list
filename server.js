@@ -12,6 +12,10 @@ app.use(express.static('public'));
 
 const Item = require('./models/item');
 
+function dbItemToJsonItem(item) {
+  return { id: item._id, name: item.name }; // eslint-disable-line no-underscore-dangle
+}
+
 app.get('/items', (req, res) => {
   Item.find((err, items) => {
     if (err) {
@@ -20,11 +24,17 @@ app.get('/items', (req, res) => {
       });
       return;
     }
-    res.json(items);
+    res.json(items.map(item => dbItemToJsonItem(item)));
   });
 });
 
 app.post('/items', (req, res) => {
+  if (req.body.id) {
+    res.status(400).json({
+      message: 'Can not provide ID',
+    });
+    return;
+  }
   Item.create({
     name: req.body.name,
   }, (err, item) => {
@@ -34,7 +44,7 @@ app.post('/items', (req, res) => {
       });
       return;
     }
-    res.status(201).json(item);
+    res.status(201).json(dbItemToJsonItem(item));
   });
 });
 
