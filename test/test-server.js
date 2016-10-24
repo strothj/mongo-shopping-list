@@ -134,16 +134,16 @@ describe('Shopping List', () => {
   it('should return error on post with empty body', (done) => {
     chai.request(app)
       .post('/items')
-      .end(function (err, res) {
+      .end((err, res) => {
         should.not.equal(err, null);
         res.should.have.status(400);
-        getItems((actualItems) => {
-          actualItems.should.have.lengthOf(3);
-          done();
-        });
+        getActualFromDatabase()
+          .then((actual) => {
+            expected.should.deep.equal(actual);
+            done();
+          });
       });
   });
-
 });
 
 
