@@ -8,3 +8,10 @@ addons:
     - mongodb-3.2-precise
     packages:
     - mongodb-org-server
+deploy:
+  provider: heroku
+  api_key:
+    secure: K7dyxMwTWy05omWjJDMYM4Pd0XQ7wUuZLL8iALCJ44YfPVK3a53bCH2vID2kkY0xt3TMS1g9Cot3j7ch7ORh1OpFMeM9xNyAxg7pNl3OoiDlcKQuDBDHB9X3sr0258JuT7mclKaCp8tfLx0LHaMTCIIqzdz+WhGBVXPb8BTke5ugLzQ9SXz49DX8VElm4dCRD8oZRmICoZ99KpbbzgQD2192XywH9PDf8Qltr6JiGea8orQE0v2aQx3A41qhsdmvA/AxGog+HoTVmgmGQk12vViufcXXQBUtHp0c3pBszw+vmY8TU5DfQMzOK/HOi/eMH/dUMKiCrGX0FgkEOP6kGmmhTlz3n/TgpL/f0nk1TLNaDCuNq1s4Di3xOZySJewt6VMAXtkU8XP6pBam1+/XweWMNv8mNICowm54OhnYi3RlKLwuptojTx++E3bcFLFqJCs55EbfEObVDjXPhZ4Gzmmi5Y6g0nKG73Jwwbp6yEmoVfk9MCiB6OUgHGrbdEBGjVIH1UBNX9vbVzLXIWLJbWO5ckvie5bC48LbKZh2v4szSCc93HQj/qtvQpnr1lRQH4XSh6G0qHGzK8SxBRW+McY4FVa0PBYBfVEiKYGzyMJXxmc4UoEYE1NpKkiup9KUvxCAD8m576o+EV/1oGSw2TPcRI5l3w1jClbIyrkAXqw=
+  app: pacific-depths-94990
+  on:
+    repo: strothj/mongo-shopping-list
