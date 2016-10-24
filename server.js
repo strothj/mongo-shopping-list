@@ -3,6 +3,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 
+mongoose.Promise = global.Promise;
+
 const config = require('./config');
 
 const app = express();
@@ -61,26 +63,26 @@ app.put('/items/:id', (req, res) => {
     });
     return;
   }
-  Item.findByIdAndUpdate(req.params.id, update, options, (err, item) => {
+  Item.findByIdAndUpdate(req.params.id, update, options, (err) => {
     if (err) {
       res.status(500).json({
         message: 'Internal Server Error',
       });
       return;
     }
-    res.status(200).json(item);
+    res.sendStatus(204);
   });
 });
 
 app.delete('/items/:id', (req, res) => {
-  Item.findByIdAndRemove(req.params.id, (err, item) => {
+  Item.findByIdAndRemove(req.params.id, (err) => {
     if (err) {
       res.status(500).json({
         message: 'Internal Server Error',
       });
       return;
     }
-    res.status(200).json(item);
+    res.sendStatus(204);
   });
 });
 
