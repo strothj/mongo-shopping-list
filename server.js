@@ -75,15 +75,21 @@ app.put('/items/:id', (req, res) => {
 });
 
 app.delete('/items/:id', (req, res) => {
-  Item.findByIdAndRemove(req.params.id, (err) => {
-    if (err) {
+  Item.findById(req.params.id).exec()
+    .then((item) => {
+      if (!item) {
+        return 404;
+      }
+      return item.remove().then(() => 204);
+    })
+    .then((status) => {
+      res.sendStatus(status);
+    })
+    .catch(() => {
       res.status(500).json({
         message: 'Internal Server Error',
       });
-      return;
-    }
-    res.sendStatus(204);
-  });
+    });
 });
 
 app.use('*', (req, res) => {
